@@ -128,11 +128,32 @@ function showEventsForDate(dateString) {
             eventItem.style.borderLeftColor = event.color;
             
             eventItem.innerHTML = `
-                <div class="event-time">${event.time}</div>
-                <div class="event-title">${event.title}</div>
-                ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                <div class="event-content">
+                    <div class="event-time">${event.time}</div>
+                    <div class="event-title">${event.title}</div>
+                    ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                </div>
+                <div class="event-actions">
+                    <button class="btn-edit" data-index="${index}">✏️</button>
+                    <button class="btn-delete" data-index="${index}">🗑️</button>
+                </div>
             `;
             
+            // Botón editar
+            const editBtn = eventItem.querySelector('.btn-edit');
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                editEvent(dateString, index);
+            });
+            
+            // Botón eliminar
+            const deleteBtn = eventItem.querySelector('.btn-delete');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteEventDirect(dateString, index);
+            });
+            
+            // Click en el evento para editar
             eventItem.addEventListener('click', () => editEvent(dateString, index));
             
             eventsListElement.appendChild(eventItem);
@@ -261,6 +282,22 @@ function deleteEvent() {
         closeModal();
         renderCalendar();
         showEventsForDate(selectedDate);
+    }
+}
+
+// Eliminar evento directamente desde la lista
+function deleteEventDirect(dateString, index) {
+    if (confirm('¿Estás seguro de que quieres eliminar este evento?')) {
+        events[dateString].splice(index, 1);
+        
+        if (events[dateString].length === 0) {
+            delete events[dateString];
+        }
+        
+        localStorage.setItem('hgwEvents', JSON.stringify(events));
+        
+        renderCalendar();
+        showEventsForDate(dateString);
     }
 }
 
