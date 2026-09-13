@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HGW - Agenda Interactiva</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="agenda.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="logo">
+                    <h1>HGW</h1>
+                    <span class="tagline">Agenda</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Volver al Inicio</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="agenda-container">
+        <div class="container">
+            <div class="agenda-header">
+                <h2>Agenda Interactiva</h2>
+                <p>Gestiona tus eventos y cronogramas</p>
+            </div>
+
+            <div class="calendar-controls">
+                <button id="prevMonth" class="btn btn-secondary">&lt; Anterior</button>
+                <h3 id="currentMonth"></h3>
+                <button id="nextMonth" class="btn btn-secondary">Siguiente &gt;</button>
+            </div>
+
+            <div class="calendar-grid">
+                <div class="calendar-day-header">Dom</div>
+                <div class="calendar-day-header">Lun</div>
+                <div class="calendar-day-header">Mar</div>
+                <div class="calendar-day-header">Mié</div>
+                <div class="calendar-day-header">Jue</div>
+                <div class="calendar-day-header">Vie</div>
+                <div class="calendar-day-header">Sáb</div>
+            </div>
+
+            <div id="calendarDays" class="calendar-grid">
+                <!-- Los días se generarán con JavaScript -->
+            </div>
+
+            <div class="events-section">
+                <h3>Eventos del día seleccionado</h3>
+                <div id="selectedDate"></div>
+                <div id="eventsList"></div>
+                <button id="addEventBtn" class="btn btn-primary">Añadir Evento</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para añadir/editar eventos -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modalTitle">Añadir Evento</h3>
+            <form id="eventForm">
+                <input type="hidden" id="eventId">
+                <div class="form-group">
+                    <label for="eventTitle">Título:</label>
+                    <input type="text" id="eventTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventTime">Hora:</label>
+                    <input type="time" id="eventTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventDescription">Descripción:</label>
+                    <textarea id="eventDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="eventColor">Color:</label>
+                    <select id="eventColor">
+                        <option value="#007bff">Azul</option>
+                        <option value="#28a745">Verde</option>
+                        <option value="#dc3545">Rojo</option>
+                        <option value="#ffc107">Amarillo</option>
+                        <option value="#6f42c1">Morado</option>
+                        <option value="#17a2b8">Cian</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <button type="button" id="deleteEventBtn" class="btn btn-danger" style="display: none;">Eliminar</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 HGW Distribuidores. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="agenda.js"></script>
+</body>
+</html>
