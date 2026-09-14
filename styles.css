@@ -249,6 +249,23 @@ header {
     margin-bottom: 1.5rem;
 }
 
+/* Sección Horario */
+.schedule-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.schedule-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
 /* Sección Agenda */
 .agenda-section {
     padding: 4rem 0;
