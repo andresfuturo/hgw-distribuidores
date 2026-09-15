@@ -2,7 +2,33 @@
 
 let currentDate = new Date();
 let selectedDate = null;
-let events = JSON.parse(localStorage.getItem('hgwEvents')) || {};
+let events = {};
+
+// Cargar eventos desde localStorage con manejo de errores
+function loadEvents() {
+    try {
+        // Verificar si localStorage está disponible
+        if (typeof localStorage === 'undefined') {
+            console.error('localStorage no está disponible en este navegador');
+            alert('Su navegador no soporta almacenamiento local. Los eventos no se guardarán.');
+            events = {};
+            return;
+        }
+
+        const storedEvents = localStorage.getItem('hgwEvents');
+        if (storedEvents) {
+            events = JSON.parse(storedEvents);
+            console.log('Eventos cargados:', Object.keys(events).length, 'días con eventos');
+            console.log('Eventos:', events);
+        } else {
+            events = {};
+            console.log('No hay eventos guardados, iniciando con agenda vacía');
+        }
+    } catch (error) {
+        console.error('Error al cargar eventos:', error);
+        events = {};
+    }
+}
 
 // Elementos del DOM
 const calendarDays = document.getElementById('calendarDays');
@@ -17,9 +43,52 @@ const eventForm = document.getElementById('eventForm');
 const modalTitle = document.getElementById('modalTitle');
 const closeBtn = document.querySelector('.close');
 const deleteEventBtn = document.getElementById('deleteEventBtn');
+const exportBtn = document.getElementById('exportBtn');
+const importFile = document.getElementById('importFile');
+
+// Guardar eventos en localStorage con manejo de errores
+function saveEvents() {
+    try {
+        // Verificar si localStorage está disponible
+        if (typeof localStorage === 'undefined') {
+            console.error('localStorage no está disponible');
+            alert('Su navegador no soporta almacenamiento local. Los eventos no se guardarán.');
+            return false;
+        }
+
+        // Verificar cuota de almacenamiento
+        const eventsString = JSON.stringify(events);
+        const sizeInBytes = new Blob([eventsString]).size;
+        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+        
+        console.log('Guardando eventos - Tamaño:', sizeInKB, 'KB');
+        console.log('Cantidad de días con eventos:', Object.keys(events).length);
+        
+        localStorage.setItem('hgwEvents', eventsString);
+        
+        // Verificar que se guardó correctamente
+        const savedEvents = localStorage.getItem('hgwEvents');
+        if (savedEvents === eventsString) {
+            console.log('Eventos guardados y verificados exitosamente');
+            return true;
+        } else {
+            console.error('Error: Los eventos no se guardaron correctamente');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error al guardar eventos:', error);
+        if (error.name === 'QuotaExceededError') {
+            alert('Error: Espacio de almacenamiento lleno. Por favor, elimine algunos eventos o use un navegador diferente.');
+        } else {
+            alert('Error al guardar los eventos: ' + error.message);
+        }
+        return false;
+    }
+}
 
 // Inicializar calendario
 function initCalendar() {
+    loadEvents();
     renderCalendar();
     setupEventListeners();
 }
@@ -199,6 +268,25 @@ function setupEventListeners() {
     eventForm.addEventListener('submit', saveEvent);
     
     deleteEventBtn.addEventListener('click', deleteEvent);
+    
+    // Event listeners para exportar/importar
+    exportBtn.addEventListener('click', exportEvents);
+    importFile.addEventListener('change', importEvents);
+    
+    // Mostrar información de localStorage en la consola
+    checkLocalStorageStatus();
+}
+
+// Verificar estado de localStorage
+function checkLocalStorageStatus() {
+    try {
+        const testKey = 'hgwTest_' + Date.now();
+        localStorage.setItem(testKey, 'test');
+        localStorage.removeItem(testKey);
+        console.log('✓ localStorage está funcionando correctamente');
+    } catch (error) {
+        console.error('✗ localStorage no está disponible:', error);
+    }
 }
 
 // Abrir modal
@@ -249,12 +337,12 @@ function saveEvent(e) {
         events[selectedDate].push({ title, time, description, color });
     }
     
-    // Guardar en localStorage
-    localStorage.setItem('hgwEvents', JSON.stringify(events));
-    
-    closeModal();
-    renderCalendar();
-    showEventsForDate(selectedDate);
+    // Guardar en localStorage usando la función centralizada
+    if (saveEvents()) {
+        closeModal();
+        renderCalendar();
+        showEventsForDate(selectedDate);
+    }
 }
 
 // Editar evento
@@ -277,11 +365,11 @@ function deleteEvent() {
             delete events[selectedDate];
         }
         
-        localStorage.setItem('hgwEvents', JSON.stringify(events));
-        
-        closeModal();
-        renderCalendar();
-        showEventsForDate(selectedDate);
+        if (saveEvents()) {
+            closeModal();
+            renderCalendar();
+            showEventsForDate(selectedDate);
+        }
     }
 }
 
@@ -294,11 +382,61 @@ function deleteEventDirect(dateString, index) {
             delete events[dateString];
         }
         
-        localStorage.setItem('hgwEvents', JSON.stringify(events));
-        
-        renderCalendar();
-        showEventsForDate(dateString);
+        if (saveEvents()) {
+            renderCalendar();
+            showEventsForDate(dateString);
+        }
     }
+}
+
+// Exportar eventos a archivo JSON
+function exportEvents() {
+    try {
+        const eventsString = JSON.stringify(events, null, 2);
+        const blob = new Blob([eventsString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'hgw_agenda_backup_' + new Date().toISOString().split('T')[0] + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        console.log('Eventos exportados exitosamente');
+    } catch (error) {
+        console.error('Error al exportar eventos:', error);
+        alert('Error al exportar eventos: ' + error.message);
+    }
+}
+
+// Importar eventos desde archivo JSON
+function importEvents(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedEvents = JSON.parse(e.target.result);
+            if (typeof importedEvents === 'object' && importedEvents !== null) {
+                events = importedEvents;
+                if (saveEvents()) {
+                    alert('Eventos importados exitosamente');
+                    renderCalendar();
+                    if (selectedDate) {
+                        showEventsForDate(selectedDate);
+                    }
+                }
+            } else {
+                alert('El archivo no tiene el formato correcto');
+            }
+        } catch (error) {
+            console.error('Error al importar eventos:', error);
+            alert('Error al importar eventos: El archivo no es un JSON válido');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // Reset file input
 }
 
 // Inicializar cuando el DOM esté listo

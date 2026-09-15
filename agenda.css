@@ -228,6 +228,24 @@
     padding: 1rem;
 }
 
+/* Controles de backup */
+.backup-controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #ddd;
+    flex-wrap: wrap;
+}
+
+.import-control {
+    display: inline-block;
+}
+
+.import-control label {
+    cursor: pointer;
+}
+
 /* Modal */
 .modal {
     display: none;

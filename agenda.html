@@ -54,6 +54,14 @@
                 <div id="selectedDate"></div>
                 <div id="eventsList"></div>
                 <button id="addEventBtn" class="btn btn-primary">Añadir Evento</button>
+                
+                <div class="backup-controls">
+                    <button id="exportBtn" class="btn btn-secondary">📥 Exportar Agenda</button>
+                    <div class="import-control">
+                        <label for="importFile" class="btn btn-secondary">📤 Importar Agenda</label>
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                    </div>
+                </div>
             </div>
         </div>
     </main>
